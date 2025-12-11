@@ -1,3 +1,5 @@
+mod globe;
+
 use std::{collections::HashMap, fs};
 
 use bevy::prelude::*;

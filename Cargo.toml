@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 bevy = {version = "0.17.3", features = ["dynamic_linking"]}
+image = "0.25.9"
 serde_json = "1.0.145"
 # Enable a small amount of optimization in the dev profile.
 [profile.dev]
