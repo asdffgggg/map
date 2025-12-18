@@ -4,6 +4,8 @@ use std::{collections::HashMap, fs};
 
 use bevy::prelude::*;
 
+use crate::globe::make_globe_mesh;
+
 fn main() {
     // App::new().add_plugins(DefaultPlugins).run();
     let mut countries = HashMap::new();
@@ -34,7 +36,8 @@ fn main() {
         }
         countries.insert(name, Country { borders });
     }
-    println!("{:?}", countries)
+    println!("{:?}", countries);
+    make_globe_mesh();
 }
 
 #[derive(Debug)]
