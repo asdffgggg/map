@@ -20,17 +20,20 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut images: ResMut<Assets<Image>>,
 ) {
     //globe
     let base_color = Color::srgb_u8(70, 220, 90);
+    let (mesh, image) = make_globe_mesh();
     commands.spawn((
         Globe,
-        Mesh3d(meshes.add(make_globe_mesh())),
+        Mesh3d(meshes.add(mesh)),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color,
+            base_color_texture: Some(images.add(image)),
             // vary key PBR parameters on a grid of spheres to show the effect
             metallic: 0.01,
             perceptual_roughness: 0.632,
+            alpha_mode: AlphaMode::Blend,
             ..default()
         })),
         Transform::from_scale(Vec3::splat(10.0)),
@@ -52,11 +55,11 @@ fn setup(
     // light
     commands.spawn((
         DirectionalLight {
-            illuminance: 10000.0,
+            illuminance: 7127.9882771332257334,
             shadows_enabled: true,
             ..default()
         },
-        Transform::from_xyz(40.0, 8.9771, 40.0).looking_at(Vec3::ZERO, Vec3::Y),
+        Transform::from_xyz(72.3008433257, 8.9771, 40.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
     // camera
     commands.spawn((
