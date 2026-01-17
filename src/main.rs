@@ -22,8 +22,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    //globe
-    let base_color = Color::srgb_u8(70, 220, 90);
+    // Globe
     let (mesh, image) = make_globe_mesh();
     commands.spawn((
         Globe,
@@ -38,21 +37,21 @@ fn setup(
         })),
         Transform::from_scale(Vec3::splat(10.0)),
     ));
-    //ocean
-    commands.spawn((
-        Mesh3d(
-            meshes.add(
-                Sphere {
-                    radius: BASE_RADIUS + RELIEF * 0.5625,
-                }
-                .mesh()
-                .uv(200, 110),
-            ),
-        ),
-        MeshMaterial3d(materials.add(Color::srgb_u8(13, 86, 185))),
-        Transform::from_scale(Vec3::splat(10.0)),
-    ));
-    // light
+    // Ocean
+    // commands.spawn((
+    //     Mesh3d(
+    //         meshes.add(
+    //             Sphere {
+    //                 radius: BASE_RADIUS + RELIEF * 0.5625,
+    //             }
+    //             .mesh()
+    //             .uv(200, 110),
+    //         ),
+    //     ),
+    //     MeshMaterial3d(materials.add(Color::srgb_u8(13, 86, 185))),
+    //     Transform::from_scale(Vec3::splat(10.0)),
+    // ));
+    // Light
     commands.spawn((
         DirectionalLight {
             illuminance: 7127.9882771332257334,
@@ -61,7 +60,7 @@ fn setup(
         },
         Transform::from_xyz(72.3008433257, 8.9771, 40.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
-    // camera
+    // Camera
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(0.0, 0.0, 40.0).looking_at(Vec3::ZERO, Vec3::Y),

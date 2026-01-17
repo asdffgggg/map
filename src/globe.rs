@@ -21,12 +21,15 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
     let mut indices = Vec::new();
     let mut uv = Vec::new();
     let mut textdata = Vec::new();
+    let mut columns = Vec::new();
     for mut i in 0..=width {
+        let u = i as f32 / width as f32;
         i %= width;
         let x = (i * scale) as u32;
         let phi = i as f32 / width as f32 * -TAU;
-        let u = i as f32 / width as f32;
+        let mut column = Vec::new();
         for j in 0..height {
+            let v = j as f32 / height as f32;
             let k = vertices.len() as u32;
             let height = height as u32;
             let y = (j * scale) as u32;
@@ -38,29 +41,38 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
             let z = theta.sin() * phi.sin();
             let y = theta.cos();
             let n = vec3(x, y, z);
-            let v = j as f32 / height as f32;
-            let rgb = if elev < 0.714 {
-                [70, 220, 90]
-            } else if elev < 0.876 {
-                [166, 92, 59]
+            let rgba = if elev < 0.676 {
+                [70, 220, 90, 100]
+            } else if elev < 0.823 {
+                [166, 92, 59, 100]
             } else {
-                [214, 220, 255]
+                [214, 220, 255, 100]
             };
             normals.push(n);
             vertices.push(n * r);
             uv.push(vec2(u, v));
             indices.extend([k, k + 1, k + 1 + height]);
             indices.extend([k, k + 1 + height, k + height]);
-            textdata.extend(rgb);
-            textdata.push(255);
+            // indices.extend([k, k + 1 + height, k + 1]);
+            // indices.extend([k, k + height, k + 1 + height]);
+            column.push(rgba)
+        }
+        columns.push(column)
+    }
+
+    for j in 0..height {
+        for column in &columns {
+            textdata.extend(column[j])
         }
     }
+
     let mesh = Mesh::new(
         PrimitiveTopology::TriangleList,
         RenderAssetUsages::default(),
     )
     .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, vertices)
     .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, normals)
+    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uv)
     .with_inserted_indices(Indices::U32(indices));
     let image = Image::new(
         Extent3d {
