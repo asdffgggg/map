@@ -16,6 +16,7 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
     let scale = 2;
     let width = img.width() as usize / scale;
     let height: usize = img.height() as usize / scale;
+    dbg!(width, height);
     let mut vertices = Vec::with_capacity(width * height);
     let mut normals = Vec::with_capacity(width * height);
     let mut indices = Vec::new();
@@ -36,23 +37,43 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
             let px: u8 = img.get_pixel(x, y).0[0];
             let theta = j as f32 / height as f32 * PI;
             let elev = px as f32 / 255.0;
+            assert!(elev >= 0.0);
+            assert!(elev <= 1.0);
             let r = BASE_RADIUS + elev * RELIEF;
             let x = theta.sin() * phi.cos();
             let z = theta.sin() * phi.sin();
             let y = theta.cos();
+            // dbg!(r, x, y, z);
             let n = vec3(x, y, z);
             let rgba = if elev < 0.676 {
-                [70, 220, 90, 100]
+                [70, 220, 90, 255]
             } else if elev < 0.823 {
-                [166, 92, 59, 100]
+                [166, 92, 59, 255]
             } else {
-                [214, 220, 255, 100]
+                [214, 220, 255, 255]
             };
             normals.push(n);
             vertices.push(n * r);
             uv.push(vec2(u, v));
-            indices.extend([k, k + 1, k + 1 + height]);
-            indices.extend([k, k + 1 + height, k + height]);
+            fn fix(mut k: u32, w: u32, a: u32, b: u32) -> u32 {
+                // print!("{k},{w},{a},{b} -> ",);
+                let m = k / w + b;
+                k += a;
+                k %= w;
+                // println!("{}", m * w + k);
+                m * w + k
+            }
+            let new_indices = [
+                fix(k, height, 0, 0),
+                fix(k, height, 1, 0),
+                fix(k, height, 1, 1),
+                fix(k, height, 0, 0),
+                fix(k, height, 1, 1),
+                fix(k, height, 0, 1),
+            ];
+            if new_indices.iter().all(|&i| i < (width as u32 + 1) * height) {
+                indices.extend(new_indices)
+            }
             // indices.extend([k, k + 1 + height, k + 1]);
             // indices.extend([k, k + height, k + 1 + height]);
             column.push(rgba)
@@ -65,6 +86,8 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
             textdata.extend(column[j])
         }
     }
+    // dbg!(&vertices, &indices);
+    dbg!(indices.iter().max().unwrap(), vertices.len());
 
     let mesh = Mesh::new(
         PrimitiveTopology::TriangleList,

@@ -32,25 +32,25 @@ fn setup(
             // vary key PBR parameters on a grid of spheres to show the effect
             metallic: 0.01,
             perceptual_roughness: 0.632,
-            alpha_mode: AlphaMode::Blend,
+
             ..default()
         })),
         Transform::from_scale(Vec3::splat(10.0)),
     ));
     // Ocean
-    // commands.spawn((
-    //     Mesh3d(
-    //         meshes.add(
-    //             Sphere {
-    //                 radius: BASE_RADIUS + RELIEF * 0.5625,
-    //             }
-    //             .mesh()
-    //             .uv(200, 110),
-    //         ),
-    //     ),
-    //     MeshMaterial3d(materials.add(Color::srgb_u8(13, 86, 185))),
-    //     Transform::from_scale(Vec3::splat(10.0)),
-    // ));
+    commands.spawn((
+        Mesh3d(
+            meshes.add(
+                Sphere {
+                    radius: BASE_RADIUS + RELIEF * 0.5625,
+                }
+                .mesh()
+                .uv(200, 110),
+            ),
+        ),
+        MeshMaterial3d(materials.add(Color::srgb_u8(13, 86, 185))),
+        Transform::from_scale(Vec3::splat(10.0)),
+    ));
     // Light
     commands.spawn((
         DirectionalLight {
