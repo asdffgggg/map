@@ -1,7 +1,7 @@
 mod country;
 mod globe;
 
-use bevy::prelude::*;
+use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::globe::{BASE_RADIUS, RELIEF, make_globe_mesh};
 
@@ -9,7 +9,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(Update, rotate)
+        .add_systems(Update, (rotate_camera, rotate_globe))
         .run();
 }
 
@@ -67,8 +67,32 @@ fn setup(
     ));
 }
 
-fn rotate(time: Res<Time>, mut query: Query<&mut Transform, With<Globe>>) {
-    for mut t in &mut query {
+fn rotate_globe(time: Res<Time>, mut globe: Query<&mut Transform, With<Globe>>) {
+    for mut t in &mut globe {
         t.rotate_local_y(0.4 * time.delta_secs());
+    }
+}
+
+fn rotate_camera(
+    time: Res<Time>,
+    mousebutton: Res<ButtonInput<MouseButton>>,
+    mut mousemotion: MessageReader<MouseMotion>,
+    mut camera: Query<&mut Transform, With<Camera3d>>,
+) {
+    if !mousebutton.pressed(MouseButton::Left) {
+        return;
+    }
+    for motion in mousemotion.read() {
+        for mut t in &mut camera {
+            t.rotate_around(
+                Vec3::ZERO,
+                Quat::from_rotation_y(time.delta_secs() * -0.4 * motion.delta.x),
+            );
+            let axis = t.local_x().into();
+            t.rotate_around(
+                Vec3::ZERO,
+                Quat::from_axis_angle(axis, time.delta_secs() * -0.4 * motion.delta.y),
+            );
+        }
     }
 }
