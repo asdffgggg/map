@@ -45,7 +45,9 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
             let y = theta.cos();
             // dbg!(r, x, y, z);
             let n = vec3(x, y, z);
-            let rgba = if elev < 0.676 {
+            let rgba = if elev < 0.562 {
+                [27, 106, 223, 255]
+            } else if elev < 0.676 {
                 [70, 220, 90, 255]
             } else if elev < 0.823 {
                 [166, 92, 59, 255]
