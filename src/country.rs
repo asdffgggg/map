@@ -7,6 +7,28 @@ struct Country {
     borders: Vec<Vec<Vec<Vec2>>>,
 }
 
+impl Country {
+    pub fn contains(&self, point: Vec2) -> bool {
+        let a = point;
+        let b = vec2(a.x + 1e9, a.y);
+        self.borders.iter().flatten().any(|poly| todo!())
+    }
+}
+
+fn segments_intersect(a: Vec2, b: Vec2, c: Vec2, d: Vec2) -> bool {
+    fn cross(a: Vec2, b: Vec2) -> f32 {
+        a.x * b.y - a.y * b.x
+    }
+    fn orient(a: Vec2, b: Vec2, c: Vec2) -> f32 {
+        cross(b - a, c - a)
+    }
+    let oa = orient(c, d, a);
+    let ob = orient(c, d, b);
+    let oc = orient(a, b, c);
+    let od = orient(a, b, d);
+    oa * ob < 0.0 && oc * od < 0.0
+}
+
 fn load_countries() -> HashMap<String, Country> {
     let mut countries = HashMap::new();
     for entry in fs::read_dir("data").unwrap() {
