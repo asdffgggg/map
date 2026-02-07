@@ -1,13 +1,15 @@
 mod country;
 mod globe;
 
+use std::f32::consts::PI;
+
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
 use crate::globe::{BASE_RADIUS, RELIEF, make_globe_mesh};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((DefaultPlugins, MeshPickingPlugin))
         .insert_resource(Rotate(false))
         .add_systems(Startup, setup)
         .add_systems(Update, (rotate_camera, rotate_globe))
@@ -31,18 +33,20 @@ fn setup(
 ) {
     // Globe
     let (mesh, image) = make_globe_mesh();
-    commands.spawn((
-        Globe,
-        Mesh3d(meshes.add(mesh)),
-        MeshMaterial3d(materials.add(StandardMaterial {
-            base_color_texture: Some(images.add(image)),
-            // vary key PBR parameters on a grid of spheres to show the effect
-            metallic: 0.01,
-            perceptual_roughness: 0.632,
-            ..default()
-        })),
-        Transform::from_scale(Vec3::splat(10.0)),
-    ));
+    commands
+        .spawn((
+            Globe,
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(StandardMaterial {
+                base_color_texture: Some(images.add(image)),
+                // vary key PBR parameters on a grid of spheres to show the effect
+                metallic: 0.01,
+                perceptual_roughness: 0.632,
+                ..default()
+            })),
+            Transform::from_scale(Vec3::splat(10.0)),
+        ))
+        .observe(observe_globe);
     // Ocean
     const OCEAN_SHELLS: usize = 4;
     for i in 1..=OCEAN_SHELLS {
@@ -126,4 +130,12 @@ fn rotate_camera(
             );
         }
     }
+}
+
+fn observe_globe(event: On<Pointer<Move>>, globe: Query<&Transform, With<Globe>>) {
+    let our_rotation = globe.single().unwrap().rotation.to_axis_angle().1;
+    let v = event.hit.position.unwrap();
+    let theta = v.x.hypot(v.z).atan2(v.y);
+    let phi = v.z.atan2(v.x) - our_rotation;
+    println!("{}, {}", theta / PI * 180.0, phi / PI * 180.0);
 }

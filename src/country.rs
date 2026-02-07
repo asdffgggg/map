@@ -11,7 +11,15 @@ impl Country {
     pub fn contains(&self, point: Vec2) -> bool {
         let a = point;
         let b = vec2(a.x + 1e9, a.y);
-        self.borders.iter().flatten().any(|poly| todo!())
+        self.borders.iter().flatten().any(|poly| {
+            (poly
+                .windows(2)
+                .filter(|w| segments_intersect(a, b, w[0], w[1]))
+                .count()
+                + segments_intersect(a, b, *poly.last().unwrap(), poly[0]) as usize)
+                % 2
+                == 1
+        })
     }
 }
 
