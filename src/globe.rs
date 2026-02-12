@@ -3,14 +3,17 @@ use std::f32::consts::{PI, TAU};
 use bevy::{
     asset::RenderAssetUsages,
     mesh::{Indices, PrimitiveTopology},
+    platform::collections::HashMap,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
 
+use crate::country::Countries;
+
 pub const BASE_RADIUS: f32 = 1.0;
 pub const RELIEF: f32 = 0.3;
 
-pub fn make_globe_mesh() -> (Mesh, Image) {
+pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image) {
     let image_bytes = include_bytes!("../World_elevation_map.png");
     let img = image::load_from_memory(image_bytes).unwrap().into_luma8();
     let scale = 2;
@@ -22,13 +25,25 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
     let mut indices = Vec::new();
     let mut uv = Vec::new();
     let mut textdata = Vec::new();
+    let mut countrytextdataorsumthing = HashMap::new();
+    for name in countries.keys() {
+        countrytextdataorsumthing.insert(name.clone(), Vec::new());
+    }
     let mut columns = Vec::new();
+    let mut countrycolumns = HashMap::new();
+    for name in countries.keys() {
+        countrycolumns.insert(name.clone(), Vec::new());
+    }
     for mut i in 0..=width {
         let u = i as f32 / width as f32;
         i %= width;
         let x = (i * scale) as u32;
         let phi = i as f32 / width as f32 * -TAU;
         let mut column = Vec::new();
+        let mut countrycolumn = HashMap::new();
+        for name in countries.keys() {
+            countrycolumn.insert(name, Vec::new());
+        }
         for j in 0..height {
             let v = j as f32 / height as f32;
             let k = vertices.len() as u32;
@@ -78,7 +93,14 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
             }
             // indices.extend([k, k + 1 + height, k + 1]);
             // indices.extend([k, k + height, k + 1 + height]);
-            column.push(rgba)
+            column.push(rgba);
+            for (name, country) in countries {
+                let rgba = if country.contains(vec2(phi / PI * 180.0, theta / PI * 180.0)) {
+                    [255, 39, 82, 100]
+                } else {
+                    [0; 4]
+                };
+            }
         }
         columns.push(column)
     }
@@ -86,6 +108,14 @@ pub fn make_globe_mesh() -> (Mesh, Image) {
     for j in 0..height {
         for column in &columns {
             textdata.extend(column[j])
+        }
+        for (name, columns) in &countrycolumns {
+            for column in columns {
+                countrytextdataorsumthing
+                    .get_mut(name)
+                    .unwrap()
+                    .extend(column[j])
+            }
         }
     }
     // dbg!(&vertices, &indices);

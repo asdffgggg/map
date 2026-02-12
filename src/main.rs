@@ -1,11 +1,14 @@
 mod country;
 mod globe;
 
-use std::f32::consts::PI;
+use std::f32::consts::{PI, TAU};
 
 use bevy::{input::mouse::MouseMotion, prelude::*};
 
-use crate::globe::{BASE_RADIUS, RELIEF, make_globe_mesh};
+use crate::{
+    country::load_countries,
+    globe::{BASE_RADIUS, RELIEF, make_globe_mesh},
+};
 
 fn main() {
     App::new()
@@ -32,7 +35,8 @@ fn setup(
     mut images: ResMut<Assets<Image>>,
 ) {
     // Globe
-    let (mesh, image) = make_globe_mesh();
+    let countries = load_countries();
+    let (mesh, image) = make_globe_mesh(&countries);
     commands
         .spawn((
             Globe,
@@ -133,9 +137,10 @@ fn rotate_camera(
 }
 
 fn observe_globe(event: On<Pointer<Move>>, globe: Query<&Transform, With<Globe>>) {
-    let our_rotation = globe.single().unwrap().rotation.to_axis_angle().1;
+    let (axis, our_rotation) = globe.single().unwrap().rotation.to_axis_angle();
     let v = event.hit.position.unwrap();
     let theta = v.x.hypot(v.z).atan2(v.y);
-    let phi = v.z.atan2(v.x) - our_rotation;
+    let phi = v.z.atan2(v.x) + axis.y * our_rotation;
+    let phi = (phi + PI).rem_euclid(TAU) - PI;
     println!("{}, {}", theta / PI * 180.0, phi / PI * 180.0);
 }

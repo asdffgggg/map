@@ -3,7 +3,7 @@ use std::{collections::HashMap, fs};
 use bevy::prelude::*;
 
 #[derive(Debug)]
-struct Country {
+pub struct Country {
     borders: Vec<Vec<Vec<Vec2>>>,
 }
 
@@ -36,8 +36,8 @@ fn segments_intersect(a: Vec2, b: Vec2, c: Vec2, d: Vec2) -> bool {
     let od = orient(a, b, d);
     oa * ob < 0.0 && oc * od < 0.0
 }
-
-fn load_countries() -> HashMap<String, Country> {
+pub type Countries = HashMap<String, Country>;
+pub fn load_countries() -> Countries {
     let mut countries = HashMap::new();
     for entry in fs::read_dir("data").unwrap() {
         let entry = entry.unwrap();
