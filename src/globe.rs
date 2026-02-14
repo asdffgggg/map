@@ -1,4 +1,7 @@
-use std::f32::consts::{PI, TAU};
+use std::{
+    f32::consts::{PI, TAU},
+    u8,
+};
 
 use bevy::{
     asset::RenderAssetUsages,
@@ -13,7 +16,7 @@ use crate::country::Countries;
 pub const BASE_RADIUS: f32 = 1.0;
 pub const RELIEF: f32 = 0.3;
 
-pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image) {
+pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image, HashMap<String, Image>) {
     let image_bytes = include_bytes!("../World_elevation_map.png");
     let img = image::load_from_memory(image_bytes).unwrap().into_luma8();
     let scale = 2;
@@ -25,12 +28,12 @@ pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image) {
     let mut indices = Vec::new();
     let mut uv = Vec::new();
     let mut textdata = Vec::new();
-    let mut countrytextdataorsumthing = HashMap::new();
+    let mut countrytextdataorsumthing: HashMap<String, Vec<u8>> = HashMap::new();
     for name in countries.keys() {
         countrytextdataorsumthing.insert(name.clone(), Vec::new());
     }
-    let mut columns = Vec::new();
-    let mut countrycolumns = HashMap::new();
+    let mut columns: Vec<Vec<[u8; 4]>> = Vec::new();
+    let mut countrycolumns: HashMap<String, Vec<Vec<[u8; 4]>>> = HashMap::new();
     for name in countries.keys() {
         countrycolumns.insert(name.clone(), Vec::new());
     }
@@ -100,9 +103,13 @@ pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image) {
                 } else {
                     [0; 4]
                 };
+                countrycolumn.get_mut(name).unwrap().push(rgba)
             }
         }
-        columns.push(column)
+        columns.push(column);
+        for (name, column) in countrycolumn {
+            countrycolumns.get_mut(name).unwrap().push(column)
+        }
     }
 
     for j in 0..height {
@@ -140,5 +147,22 @@ pub fn make_globe_mesh(countries: &Countries) -> (Mesh, Image) {
         TextureFormat::Rgba8Unorm,
         RenderAssetUsages::all(),
     );
-    (mesh, image)
+    let mut decals = HashMap::new();
+    for (name, textdata) in countrytextdataorsumthing {
+        decals.insert(
+            name,
+            Image::new(
+                Extent3d {
+                    width: width as u32 + 1,
+                    height: height as u32,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                textdata,
+                TextureFormat::Rgba8Unorm,
+                RenderAssetUsages::all(),
+            ),
+        );
+    }
+    (mesh, image, decals)
 }

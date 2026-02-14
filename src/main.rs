@@ -36,7 +36,7 @@ fn setup(
 ) {
     // Globe
     let countries = load_countries();
-    let (mesh, image) = make_globe_mesh(&countries);
+    let (mesh, image, decals) = make_globe_mesh(&countries);
     commands
         .spawn((
             Globe,
