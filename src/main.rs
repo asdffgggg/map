@@ -7,7 +7,13 @@ use crate::globe::{BASE_RADIUS, RELIEF, make_globe_mesh};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                canvas: Some("#globe".into()),
+                ..default()
+            }),
+            ..default()
+        }))
         .insert_resource(Rotate(false))
         .add_systems(Startup, setup)
         .add_systems(Update, (rotate_camera, rotate_globe))
