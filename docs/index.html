@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+
+<head>
+    <title>
+        But Not You
+    </title>
+    <meta charset="`utf-8" />
+    
+<script type="module">
+import init, * as bindings from '/map-b2ceecdb4fc551ee.js';
+const wasm = await init({ module_or_path: '/map-b2ceecdb4fc551ee_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+</head>
+
+<body style="width:100%;height:100%;margin:0;padding:0;">
+    <canvas id="globe"></canvas>
+</body>
